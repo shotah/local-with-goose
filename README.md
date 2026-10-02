@@ -1,10 +1,10 @@
 # Local coder
 
-A local coding model on this Mac: an Apple M5 Pro with 48 GB of unified memory and 307 GB/s of memory bandwidth.
+A local coding model, with Goose as the agent.
 
 The default model is **[Qwen3-Coder-30B-A3B-Instruct](https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct)** at 4-bit, served by [Ollama](https://ollama.com/). The tag [`qwen3-coder:30b`](https://ollama.com/library/qwen3-coder:30b) is the Q4_K_M quant, about 19 GB. It is a mixture of experts: 30.5B parameters resident, 3.3B active on each token. There is no 32B-A3B tag. The dense 32B in the Qwen3 family is [`qwen3:32b`](https://ollama.com/library/qwen3:32b), a general model, not this coder.
 
-Quit Docker before loading a model. Docker's 16 GB reservation comes out of the same 48 GB. macOS lives in that memory too, so a weight file near 40 GB is the edge, and a file past 48 GB does not fit.
+Quit Docker before loading a model if it holds a large memory reservation. The weights, the KV cache, and the operating system share one memory pool. A weight file larger than the free memory does not fit.
 
 ## Plan
 
@@ -21,19 +21,19 @@ make session MODEL=qwen2.5-coder:32b
 
 ## Models
 
-Sizes are the Ollama download. A dense model rereads the whole file for every token, so a 20 GB file is about 15 tokens per second on this machine and a 40 GB file is about half that. The default model keeps 19 GB resident and only reads the active experts, so it is faster than the dense 32B.
+Sizes are the Ollama download. A dense model rereads the whole file for every token, so a larger file is slower. The default model keeps 19 GB resident and only reads the active experts, so it is faster than the dense 32B.
 
 | Preference | Tag | Download | Notes |
 |---|---|---|---|
 | Goose, the default | `qwen3-coder:30b` | 19 GB | 30.5B total, 3.3B active. Long tool lists come out as XML, which Goose parses. |
-| Dense code, one reply | `qwen2.5-coder:32b` | 20 GB | All 32B parameters active. Stronger single answers, about 15 tokens per second. Tool calls come out as bare JSON, which Goose prints and does not run. |
-| Same coder, use the spare RAM | `qwen2.5-coder:32b-instruct-q8_0` | 35 GB | Closer to the original weights. Slower. Same bare-JSON tool calls. Fits if Docker is quit. |
+| Dense code, one reply | `qwen2.5-coder:32b` | 20 GB | All 32B parameters active. Stronger single answers. Tool calls come out as bare JSON, which Goose prints and does not run. |
+| Same coder, higher quality | `qwen2.5-coder:32b-instruct-q8_0` | 35 GB | Closer to the original weights. Slower. Same bare-JSON tool calls. Needs more free memory than the 20 GB quant. |
 | Faster, still a coder | `qwen2.5-coder:14b` | 9 GB | Dense 14B. Leaves a long context next to the weights. Weaker on hard code than the 32B. |
 | Dense agent | `devstral:24b` | 14 GB | Built to use tools and edit a repo. Apache 2.0. 128K context. |
 | Many languages | `codestral:22b` | 13 GB | 22B, fill-in-the-middle, 80+ languages. The license is not Apache. Read it before using the output at work. |
 | Python only | `codellama:34b-python` | 19 GB | 2023 fine-tune on an extra 100B tokens of Python. Same download as the dense 32B coder, and weaker at Python than that coder. |
-| Biggest file that can load | `llama3.3:70b` | 43 GB | Dense 70B, general model, about 8 tokens per second. Loads only with Docker quit and a short context. |
-| Does not fit | `qwen3-coder-next` | 52 GB | 80B total, 3B active. The 4-bit file is larger than this Mac. The 2-bit and 3-bit files fit and are the low-quality quants. |
+| Large general model | `llama3.3:70b` | 43 GB | Dense 70B, general model. Needs the weight file plus a short context to fit in free memory. |
+| Needs more memory | `qwen3-coder-next` | 52 GB | 80B total, 3B active. The 4-bit file is 52 GB. The 2-bit and 3-bit files are smaller and lower quality. |
 
 There is no current Go-only model at this size. Go is already in the training mix of `qwen2.5-coder` and `codestral`. A language-only model is not faster unless it has fewer parameters, and the Python-only tag above is the same 19 GB as a general coder from two years later. For Python or Go on a speed budget, `qwen2.5-coder:14b` is the efficient pull. For a hard problem in either language, use the 32B coder or the default.
 

@@ -16,7 +16,7 @@ help:
 	@echo "session   Pull the model if needed, then open a Goose session on it"
 	@echo ""
 	@echo "Installs the Goose CLI (block-goose-cli), not the desktop app."
-	@echo "Quit Docker before serve. Its memory comes out of the same 48 GB."
+	@echo "Quit Docker before serve if it holds a large memory reservation."
 
 prereqs:
 	brew install ollama
