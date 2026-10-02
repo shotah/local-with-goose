@@ -87,7 +87,8 @@ To enable additional capabilities like web search:
 
 ```bash
 make prereqs
-make serve          # stays in the foreground; Ctrl-C stops it
+make serve          # background; make stop to quit
+make stop
 make chat           # second terminal, model only
 make session        # second terminal, Goose on that model
 make session MODEL=devstral:24b
@@ -106,19 +107,18 @@ make session WORKSPACE_PATH=/path/to/your/repo
 make session MODEL=qwen2.5-coder:32b WORKSPACE_PATH=/path/to/your/repo
 ```
 
-### Option 2: Persistent Configuration via Environment Variables
-Add the following to your shell configuration file (e.g., `.bashrc`, `.zshrc`):
+### Option 2: Persistent Configuration via `make setup-shell`
+`make setup-shell` appends this to `~/.zshrc`. Goose reads the provider and model from the environment. A new session uses the process working directory, so the function enters `GOOSE_WORKING_DIR` before launching `goose`.
+
 ```bash
-# Set default workspace for Goose
-export GOOSE_WORKSPACE_PATH="/path/to/your/repo"
-export GOOSE_MODEL="qwen3-coder:30b"
+# Goose default settings
 export GOOSE_PROVIDER="ollama"
+export GOOSE_MODEL="qwen3-coder:30b"
+export GOOSE_WORKING_DIR="/path/to/your/repo"
+goose() { (cd "$GOOSE_WORKING_DIR" && command goose "$@"); }
 ```
 
-After adding to your shell config, you can simply run:
-```bash
-make session  # Will use the configured workspace and model
-```
+Open a new terminal, then run `goose` from any directory. `command goose` stays in the current directory.
 
 ### Option 3: Create a Local Makefile
 Create a `Makefile` in your target repository that includes:

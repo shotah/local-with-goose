@@ -19,7 +19,7 @@ When you want to share specific code segments, you can:
 - Use natural language to describe what you want changed/analyzed
 
 ### 3. **Workspace Navigation**
-Since you can set your workspace path (via `GOOSE_WORKSPACE_PATH`), Goose has access to your entire project directory structure:
+A Goose session starts in `GOOSE_WORKING_DIR` (saved by `make setup-shell`), so Goose has access to that project directory structure:
 ```
 # You can ask questions like:
 "Analyze how the database connection is established in my project"
